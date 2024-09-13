@@ -77,3 +77,10 @@ type PrintStatement struct {
 }
 
 func (pe PrintStatement) statement() {}
+
+type ImportStatement struct {
+	Name     string
+	Filepath string
+}
+
+func (is ImportStatement) statement() {}

@@ -219,3 +219,15 @@ func parsePrintStatement(p *parser) ast.Statement {
 		Input: expression,
     }
 }
+
+func parseImportStatement(p *parser) ast.Statement {
+	p.expect(lexer.IMPORT)
+	name := p.expect(lexer.IDENT).Value
+	p.expect(lexer.LPAR)
+	filepath := p.expect(lexer.IDENT).Value
+	p.expect(lexer.RPAR)
+	return &ast.ImportStatement{
+		Name: name,
+		Filepath: filepath,
+	}
+}
