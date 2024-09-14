@@ -17,6 +17,7 @@ type Memory struct {
 	Variables map[string]*ast.VariableDecStatement
 	Functions map[string]*ast.FunctionDecStatement
 	Classes   map[string]*ast.ClassDecStatement
+	ClassesInstances   map[string]*ast.ClassInstance
 }
 
 func NewRunner() *Runner {

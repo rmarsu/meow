@@ -69,7 +69,9 @@ func (r *Runner) evaluateSymbolExpression(e *ast.SymbolExpression,) any {
 func (r *Runner) evaluateMemberInstance(e *ast.MemberInstance) any {
 	pkg := r.GetPackage(r.Evaluate(e.Instance).(string))
 	if pkg == nil {
-		return nil
+		class := r.GetClassInstance(r.MainPackage(), r.Evaluate(e.Instance).(string))
+		return r.Evaluate(class.Fields[e.MemberName])
 	}
+
 	return r.Evaluate(r.GetVariable(pkg, e.MemberName).AssignedValue)
 }

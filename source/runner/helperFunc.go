@@ -2,8 +2,6 @@ package runner
 
 import "meow/source/ast"
 
-
-
 func (r *Runner) initPackage(packagename string) *Package {
 	var pkg *Package
 	if packagename == "main" {
@@ -12,9 +10,10 @@ func (r *Runner) initPackage(packagename string) *Package {
 			pkg = &Package{
 				IsMain: true,
 				Memory: Memory{
-					Variables: make(map[string]*ast.VariableDecStatement),
-					Functions: make(map[string]*ast.FunctionDecStatement),
-					Classes:   make(map[string]*ast.ClassDecStatement),
+					Variables:        make(map[string]*ast.VariableDecStatement),
+					Functions:        make(map[string]*ast.FunctionDecStatement),
+					Classes:          make(map[string]*ast.ClassDecStatement),
+					ClassesInstances: make(map[string]*ast.ClassInstance),
 				},
 			}
 			r.Packages["main"] = pkg
@@ -25,9 +24,10 @@ func (r *Runner) initPackage(packagename string) *Package {
 			pkg = &Package{
 				IsMain: false,
 				Memory: Memory{
-					Variables: make(map[string]*ast.VariableDecStatement),
-					Functions: make(map[string]*ast.FunctionDecStatement),
-					Classes:   make(map[string]*ast.ClassDecStatement),
+					Variables:        make(map[string]*ast.VariableDecStatement),
+					Functions:        make(map[string]*ast.FunctionDecStatement),
+					Classes:          make(map[string]*ast.ClassDecStatement),
+					ClassesInstances: make(map[string]*ast.ClassInstance),
 				},
 			}
 			r.Packages[packagename] = pkg
