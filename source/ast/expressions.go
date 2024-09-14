@@ -23,7 +23,7 @@ func (s StringExpression) expression() {
 // symbol
 type SymbolExpression struct {
 	Package string
-	Value string
+	Value   string
 }
 
 func (s SymbolExpression) expression() {
@@ -76,3 +76,10 @@ type FunctionInstance struct {
 }
 
 func (fi FunctionInstance) expression() {}
+
+type ImportedVariableExpression struct {
+	ImportName string
+	Variable   string
+}
+
+func (ive ImportedVariableExpression) expression() {}

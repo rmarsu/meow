@@ -54,6 +54,7 @@ var defaultPatterns = []regexPattern{
 	{regexp.MustCompile(`\s+`), skipHandler},
 	{regexp.MustCompile(`"[^"]*"`), stringHandler},
 	{regexp.MustCompile(`\#\#.*`), skipHandler},
+	{regexp.MustCompile(`[.]`), defaultHandler(DOT, ".")},
 	{regexp.MustCompile(`\(`), defaultHandler(LPAR, "(")},
 	{regexp.MustCompile(`\)`), defaultHandler(RPAR, ")")},
 	{regexp.MustCompile(`\^`), defaultHandler(EXCLAMINATION_MARK, "!")},

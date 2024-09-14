@@ -3,4 +3,8 @@ import math "code_examples/module_02.meow";
 var radius = 1;
 const pi = 3.14;
 
-meow(radius);
+if (radius < 0) (
+    meow(radius);
+) else (
+    meow(pi);
+);

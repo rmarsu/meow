@@ -47,7 +47,7 @@ func (r *Runner) Execute(s ast.Statement, packagename string) {
 	case *ast.ReturnStatement:
 		r.RunReturnStatement(stmt)
 	case *ast.IfStatement:
-		r.RunIfStatement(stmt)
+		r.RunIfStatement(stmt, packagename)
 	case *ast.PrintStatement:
 		r.RunPrintStatement(stmt)
 	case *ast.ExpressionStatement:
@@ -56,4 +56,3 @@ func (r *Runner) Execute(s ast.Statement, packagename string) {
 		r.RunWhileStatement(stmt)
 	}
 }
-

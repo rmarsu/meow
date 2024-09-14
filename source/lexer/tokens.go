@@ -16,6 +16,7 @@ const (
 	STRING
 
 	// Operators and delimiters
+	DOT
 	ASSIGN
 	PLUS
 	PLUS_EQUALS
@@ -64,7 +65,7 @@ const (
 	RCURLY
 
 	VOID
-     EXCLAMINATION_MARK
+	EXCLAMINATION_MARK
 )
 
 var reserved_lookup map[string]TokenKind = map[string]TokenKind{
@@ -89,7 +90,7 @@ var reserved_lookup map[string]TokenKind = map[string]TokenKind{
 	"public":   PUBLIC,
 	"private":  PRIVATE,
 	"void":     VOID,
-     "!": EXCLAMINATION_MARK,
+	"!":        EXCLAMINATION_MARK,
 }
 
 type Token struct {
@@ -207,8 +208,10 @@ func TokenKindString(kind TokenKind) string {
 		return "RCURLY"
 	case VOID:
 		return "VOID"
-     case EXCLAMINATION_MARK:
-          return "EXCLAMINATION_MARK"
+	case EXCLAMINATION_MARK:
+		return "EXCLAMINATION_MARK"
+	case DOT:
+		return "DOT"
 	}
 	return "UNKNOWN"
 }
