@@ -15,8 +15,8 @@ func (r *Runner) Evaluate(expr ast.Expression) any {
 		return r.evaluateBinaryExpression(e)
 	case *ast.SymbolExpression:
 		return r.evaluateSymbolExpression(e)
-	case *ast.ImportedVariableExpression:
-		return r.evaluateImportedVariableExpression(e)
+	case *ast.MemberInstance:
+		return r.evaluateMemberInstance(e)
 	}
 	return nil
 }
@@ -53,16 +53,23 @@ func (r *Runner) evaluateBinaryExpression(e *ast.BOExpression) any {
 	case lexer.EQUALS:
 		return left.(float64) == right.(float64)
 	case lexer.NOT_EQUALS:
-		return left.(float64)!= right.(float64)
+		return left.(float64) != right.(float64)
 	}
 	return nil
 }
 
-func (r *Runner) evaluateSymbolExpression(e *ast.SymbolExpression) any {
-	return r.Evaluate(r.GetVariable(r.Packages["main"], e.Value).AssignedValue)
+func (r *Runner) evaluateSymbolExpression(e *ast.SymbolExpression,) any {
+	variable := r.GetVariable(r.Packages["main"], e.Value)
+	if variable == nil {
+		return e.Value
+    }
+	return r.Evaluate(variable.AssignedValue)
 }
 
-func (r *Runner) evaluateImportedVariableExpression(e *ast.ImportedVariableExpression) any {
-	pkg := r.GetPackage(e.ImportName)
-    return r.Evaluate(r.GetVariable(pkg, e.Variable).AssignedValue)
+func (r *Runner) evaluateMemberInstance(e *ast.MemberInstance) any {
+	pkg := r.GetPackage(r.Evaluate(e.Instance).(string))
+	if pkg == nil {
+		return nil
+	}
+	return r.Evaluate(r.GetVariable(pkg, e.MemberName).AssignedValue)
 }

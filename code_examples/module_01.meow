@@ -2,9 +2,10 @@ import math "code_examples/module_02.meow";
 
 var radius = 1;
 const pi = 3.14;
+const ass = math.something;
 
 if (radius < 0) (
     meow(radius);
 ) else (
-    meow(pi);
+    meow(ass);
 );

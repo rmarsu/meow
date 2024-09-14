@@ -1,11 +1,11 @@
 package parser
 
 import (
+	"errors"
+	"fmt"
 	"meow/source/ast"
 	"meow/source/ast/helper"
 	"meow/source/lexer"
-	"errors"
-	"fmt"
 	"strconv"
 )
 
@@ -37,16 +37,7 @@ func parsePrimaryExpressions(p *parser) ast.Expression {
 	case lexer.STRING:
 		return &ast.StringExpression{Value: p.advance().Value}
 	case lexer.IDENT:
-		name := p.expect(lexer.IDENT).Value
-		if p.getCurrToken().Kind == lexer.DOT {
-			p.advance()
-			variable := p.expect(lexer.IDENT).Value
-			return &ast.ImportedVariableExpression{
-				ImportName: name,
-                Variable:  variable,
-			}
-		}
-		return &ast.SymbolExpression{Value: name}
+		return &ast.SymbolExpression{Value: p.advance().Value}
 	default:
 		p.errors = append(p.errors, errors.New("невозможно создать первичное выражение"))
 		return nil
@@ -159,3 +150,13 @@ func parseFunctionInstanceExpression(p *parser, left ast.Expression, bp binding_
 		Parameters:   parameters,
 	}
 }
+
+func parseMemberInstanceExpression(p *parser, left ast.Expression , bp binding_power) ast.Expression {
+	p.expect(lexer.DOT)
+	memberName := p.expect(lexer.IDENT).Value
+    return &ast.MemberInstance{
+        Instance: left,
+        MemberName: memberName,
+    }
+}
+

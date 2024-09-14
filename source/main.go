@@ -27,7 +27,6 @@ func Start(filepath string) {
 	}
 	runner := runner.NewRunner()
 	runner.Run(&ast, "main")
-
 }
 
 func DebugTree(filepath string) {

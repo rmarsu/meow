@@ -2,6 +2,8 @@ package runner
 
 import "meow/source/ast"
 
+
+
 func (r *Runner) initPackage(packagename string) *Package {
 	var pkg *Package
 	if packagename == "main" {
@@ -32,4 +34,8 @@ func (r *Runner) initPackage(packagename string) *Package {
 		}
 	}
 	return pkg
+}
+
+func (r *Runner) MainPackage() *Package {
+	return r.Packages["main"]
 }
