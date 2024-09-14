@@ -22,6 +22,7 @@ func (s StringExpression) expression() {
 
 // symbol
 type SymbolExpression struct {
+	Package string
 	Value string
 }
 

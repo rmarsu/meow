@@ -2,55 +2,30 @@ package runner
 
 import "meow/source/ast"
 
-type Memory struct {
-	Variables map[string]interface{}
-	Functions map[string]ast.FunctionDecStatement
-	Classes   map[string]ast.ClassDecStatement
+func (r *Runner) GetPackage(filepath string) *Package {
+    return r.Packages[filepath]
 }
 
-func NewMemory() *Memory {
-	return &Memory{
-		Variables: make(map[string]any),
-		Functions: make(map[string]ast.FunctionDecStatement),
-		Classes:   make(map[string]ast.ClassDecStatement),
-	}
+func (r *Runner) RegisterVariable(pkg *Package, varDec *ast.VariableDecStatement) {
+    pkg.Memory.Variables[varDec.Name] = varDec
 }
 
-func (m *Memory) GetVariable(name string) (interface{}, bool) {
-	return m.Variables[name], true
+func (r *Runner) GetVariable(pkg *Package, name string) *ast.VariableDecStatement {
+    return pkg.Memory.Variables[name]
 }
 
-func (m *Memory) GetFunction(name string) (ast.FunctionDecStatement, bool) {
-	return m.Functions[name], true
+func (r *Runner) RegisterFunction(pkg *Package, funcDec *ast.FunctionDecStatement) {
+    pkg.Memory.Functions[funcDec.Name] = funcDec
 }
 
-func (m *Memory) GetClass(name string) (interface{}, bool) {
-	return m.Classes[name], true
+func (r *Runner) GetFunction(pkg *Package, name string) *ast.FunctionDecStatement {
+    return pkg.Memory.Functions[name]
 }
 
-func (m *Memory) SetVariable(name string, value any) {
-	m.Variables[name] = value
+func (r *Runner) RegisterClass(pkg *Package, classDec *ast.ClassDecStatement) {
+    pkg.Memory.Classes[classDec.Name] = classDec
 }
 
-func (m *Memory) SetFunction(name string, value ast.FunctionDecStatement) {
-	m.Functions[name] = value
-}
-
-func (m *Memory) SetClass(name string, value ast.ClassDecStatement) {
-	m.Classes[name] = value
-}
-
-func (m *Memory) GetAll() any {
-	variables := make(map[string]any)
-	for name, value := range m.Variables {
-		variables[name] = value
-	}
-	for name, value := range m.Functions {
-        variables[name] = value
-    }
-	for name, value := range m.Classes {
-        variables[name] = value
-    }
-
-	return variables
+func (r *Runner) GetClass(pkg *Package, name string) *ast.ClassDecStatement {
+    return pkg.Memory.Classes[name]
 }

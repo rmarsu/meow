@@ -89,4 +89,5 @@ func createTokenLookups() {
 	statement(lexer.IF, parseIfStatement)
 	statement(lexer.FOR, parseWhileStatement)
 	statement(lexer.MEOW, parsePrintStatement)
+	statement(lexer.IMPORT, parseImportStatement)
 }

@@ -1,15 +1,19 @@
-package start
+package runner
 
 import (
 	"io"
+	"meow/source/ast"
 	"meow/source/lexer"
 	"meow/source/parser"
-	"meow/source/runner"
 	"os"
 )
 
-func Start(filepath string) {
-	file, err := os.Open(filepath)
+
+
+func (r *Runner) RunImportStatement(stmt *ast.ImportStatement) {
+	importName := stmt.ImportName
+	packagePath := stmt.PackagePath
+	file, err := os.Open(packagePath)
 	if err != nil {
 		panic(err)
 	}
@@ -23,7 +27,5 @@ func Start(filepath string) {
 	if err != nil {
 		panic(err)
 	}
-	runner := runner.NewRunner()
-	runner.Run(&ast, "main")
-
+	r.Run(&ast, importName)
 }

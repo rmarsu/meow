@@ -219,3 +219,14 @@ func parsePrintStatement(p *parser) ast.Statement {
 		Input: expression,
     }
 }
+
+func parseImportStatement(p *parser) ast.Statement {
+	p.expect(lexer.IMPORT)
+	name := p.expect(lexer.IDENT).Value
+    path := p.expect(lexer.STRING).Value
+    p.expect(lexer.SEMICOLON)
+    return &ast.ImportStatement{
+		ImportName: name,
+        PackagePath: path,
+    }
+}

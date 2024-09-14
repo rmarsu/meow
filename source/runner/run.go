@@ -4,18 +4,56 @@ import (
 	"meow/source/ast"
 )
 
-type Runner struct {
-	Errors []error
-	AST     ast.BlockStatement
+type Package struct {
+	IsMain bool
 	Memory
-	Output   string
 }
 
-func NewRunner(ast ast.BlockStatement) *Runner {
-     return &Runner{AST: ast, Memory:*NewMemory()}
+type Runner struct {
+	Packages map[string]*Package
 }
 
-func (r *Runner) Run() {
-	Tree := r.AST
-	r.runBlockStatement(&Tree)
+type Memory struct {
+	Variables map[string]*ast.VariableDecStatement
+	Functions map[string]*ast.FunctionDecStatement
+	Classes   map[string]*ast.ClassDecStatement
 }
+
+func NewRunner() *Runner {
+	return &Runner{
+		Packages: make(map[string]*Package),
+	}
+}
+
+func (r *Runner) Run(tree *ast.BlockStatement, packagename string) {
+	for _, stmt := range tree.Statements {
+		r.Execute(stmt, packagename)
+	}
+}
+
+func (r *Runner) Execute(s ast.Statement, packagename string) {
+	pkg := r.initPackage(packagename)
+	switch stmt := s.(type) {
+	case *ast.ImportStatement:
+		r.RunImportStatement(stmt)
+	case *ast.ClassDecStatement:
+		r.RegisterClass(pkg, stmt)
+	case *ast.FunctionDecStatement:
+		r.RegisterFunction(pkg, stmt)
+	case *ast.VariableDecStatement:
+		r.RegisterVariable(pkg, stmt)
+	case *ast.BlockStatement:
+		r.Run(stmt, packagename)
+	case *ast.ReturnStatement:
+		r.RunReturnStatement(stmt)
+	case *ast.IfStatement:
+		r.RunIfStatement(stmt)
+	case *ast.PrintStatement:
+		r.RunPrintStatement(stmt)
+	case *ast.ExpressionStatement:
+		r.RunExpressionStatement(stmt)
+	case *ast.WhileStatement:
+		r.RunWhileStatement(stmt)
+	}
+}
+
