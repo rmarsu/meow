@@ -35,7 +35,7 @@ func parsePrimaryExpressions(p *parser) ast.Expression {
 		number, _ := strconv.ParseFloat(p.advance().Value, 64)
 		return &ast.NumberExpression{Value: number}
 	case lexer.STRING:
-		return &ast.StringExpression{Value: p.advance().Value}
+		return &ast.StringExpression{Value: []rune(p.advance().Value)}
 	case lexer.IDENT:
 		return &ast.SymbolExpression{Value: p.advance().Value}
 	default:
@@ -106,28 +106,21 @@ func parseClassInstanceExpressions(p *parser) ast.Expression {
 	}
 }
 
-func parseArrayInstanceExpressions(p *parser) ast.Expression {
-	var underlyingType ast.Type
+func parseArrayInstanceExpressions(p *parser, left ast.Expression, bp binding_power) ast.Expression {
 	var content = []ast.Expression{}
 	p.expect(lexer.LBRAK)
-	p.expect(lexer.RBRAK)
-
-	underlyingType = parseType(p, default_power)
-	if p.getCurrToken().Kind == lexer.LCURLY {
-		p.advance()
-		for p.hasTokens() && p.getCurrToken().Kind != lexer.RCURLY {
+	if p.getCurrToken().Kind != lexer.RBRAK {
+		for p.hasTokens() && p.getCurrToken().Kind != lexer.RBRAK {
 			content = append(content, parseExpression(p, LOGICAL))
-			if p.getCurrToken().Kind != lexer.RCURLY {
+			if p.getCurrToken().Kind != lexer.RBRAK {
 				p.expect(lexer.COMMA)
 			}
 		}
-		p.expect(lexer.RCURLY)
 	} else {
-		content = nil
 	}
-
+	p.expect(lexer.RBRAK)
 	return &ast.ArrayInstance{
-		Underlying: underlyingType,
+		Underlying: left,
 		Content:    content,
 	}
 }
@@ -151,12 +144,11 @@ func parseFunctionInstanceExpression(p *parser, left ast.Expression, bp binding_
 	}
 }
 
-func parseMemberInstanceExpression(p *parser, left ast.Expression , bp binding_power) ast.Expression {
+func parseMemberInstanceExpression(p *parser, left ast.Expression, bp binding_power) ast.Expression {
 	p.expect(lexer.DOT)
 	memberName := p.expect(lexer.IDENT).Value
-    return &ast.MemberInstance{
-        Instance: left,
-        MemberName: memberName,
-    }
+	return &ast.MemberInstance{
+		Instance:   left,
+		MemberName: memberName,
+	}
 }
-

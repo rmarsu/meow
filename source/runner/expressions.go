@@ -23,6 +23,8 @@ func (r *Runner) Evaluate(expr ast.Expression) any {
 		return r.evaluatePrefixExpression(e)
 	case *ast.AssignmentExpression:
 		return r.evaluateAssignmentExpression(e)
+	case *ast.ArrayInstance:
+		return r.evaluateArrayInstance(e)
 	}
 	return nil
 }
@@ -32,7 +34,7 @@ func (r *Runner) evaluateNumberExpression(e *ast.NumberExpression) float64 {
 }
 
 func (r *Runner) evaluateStringExpression(e *ast.StringExpression) string {
-	return e.Value
+	return string(e.Value)
 }
 
 func (r *Runner) evaluateBinaryExpression(e *ast.BOExpression) any {
@@ -96,6 +98,9 @@ func (r *Runner) evaluateFunctionInstance(e *ast.FunctionInstance) any {
 
 	}
 	result := r.Run(function.Body, "main")
+	if len(function.ReturnType) != len(result) {
+		panic("Неверное число возвращаемых значений")
+	}
 	if len(result) == 1 {
 		return result[0]
 	}
@@ -118,8 +123,19 @@ func (r *Runner) evaluatePrefixExpression(e *ast.PrefixExpression) any {
 
 func (r *Runner) evaluateAssignmentExpression(e *ast.AssignmentExpression) any {
 	r.RegisterVariable(r.MainPackage(), r.GetVariable(r.MainPackage(), e.Assigne.(*ast.SymbolExpression).Value))
-	r.GetVariable(r.MainPackage(), e.Assigne.(*ast.SymbolExpression).Value).AssignedValue = &ast.NumberExpression{Value: r.Evaluate(e.Value).(float64)}
 	variable := r.GetVariable(r.MainPackage(), e.Assigne.(*ast.SymbolExpression).Value)
+	if variable.IsConstant {
+		panic("Нельзя изменять константу")
+	}
+	variable.AssignedValue = &ast.NumberExpression{Value: r.Evaluate(e.Value).(float64)}
 	return variable
+}
 
+func (r *Runner) evaluateArrayInstance(e *ast.ArrayInstance) any {
+	underlying := r.Evaluate(e.Underlying).(string)
+	var indexes []any
+	for _, index := range e.Content {
+		indexes = append(indexes, r.Evaluate(index))
+	}
+	return string(underlying[int(indexes[0].(float64))])
 }

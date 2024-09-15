@@ -13,7 +13,7 @@ func (n NumberExpression) expression() {
 
 // string
 type StringExpression struct {
-	Value string
+	Value []rune
 }
 
 func (s StringExpression) expression() {
@@ -63,7 +63,7 @@ type ClassInstance struct {
 func (ci ClassInstance) expression() {}
 
 type ArrayInstance struct {
-	Underlying Type
+	Underlying Expression
 	Content    []Expression
 }
 

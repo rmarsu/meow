@@ -1,5 +1,8 @@
+import math "code_examples/module_02.meow";
+
 var radius = 1;
 const pi = 3.14;
+var i = 0;
 
 void findS(rad int) (int) (
     return rad * rad * pi;
@@ -7,7 +10,7 @@ void findS(rad int) (int) (
 
 for (radius != 10) (
     radius = radius + 1;
-    meow(findS(radius));
+    ## meow(findS(radius));
+    meow(math.something[i]);
+    i = i + 1;
 );
-
-meow("timeless journeys always are familiar...");
