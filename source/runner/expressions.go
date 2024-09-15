@@ -17,6 +17,12 @@ func (r *Runner) Evaluate(expr ast.Expression) any {
 		return r.evaluateSymbolExpression(e)
 	case *ast.MemberInstance:
 		return r.evaluateMemberInstance(e)
+	case *ast.FunctionInstance:
+		return r.evaluateFunctionInstance(e)
+	case *ast.PrefixExpression:
+		return r.evaluatePrefixExpression(e)
+	case *ast.AssignmentExpression:
+		return r.evaluateAssignmentExpression(e)
 	}
 	return nil
 }
@@ -58,11 +64,11 @@ func (r *Runner) evaluateBinaryExpression(e *ast.BOExpression) any {
 	return nil
 }
 
-func (r *Runner) evaluateSymbolExpression(e *ast.SymbolExpression,) any {
+func (r *Runner) evaluateSymbolExpression(e *ast.SymbolExpression) any {
 	variable := r.GetVariable(r.Packages["main"], e.Value)
 	if variable == nil {
 		return e.Value
-    }
+	}
 	return r.Evaluate(variable.AssignedValue)
 }
 
@@ -74,4 +80,46 @@ func (r *Runner) evaluateMemberInstance(e *ast.MemberInstance) any {
 	}
 
 	return r.Evaluate(r.GetVariable(pkg, e.MemberName).AssignedValue)
+}
+
+func (r *Runner) evaluateFunctionInstance(e *ast.FunctionInstance) any {
+	function := r.GetFunction(r.MainPackage(), e.FunctionName)
+	if function.Name == "" {
+		panic("функция не найдена")
+	}
+	if len(e.Parameters) != len(function.Parameters) {
+		panic("Неверное число аргументов")
+	}
+	for i := range function.Parameters {
+		function.Parameters[i].AssignedValue = e.Parameters[i]
+		r.RegisterVariable(r.MainPackage(), &function.Parameters[i])
+
+	}
+	result := r.Run(function.Body, "main")
+	if len(result) == 1 {
+		return result[0]
+	}
+	return result
+}
+
+func (r *Runner) evaluatePrefixExpression(e *ast.PrefixExpression) any {
+	right := r.Evaluate(e.RightExpr)
+
+	switch e.Op.Kind {
+	case lexer.MINUS:
+		return -right.(float64)
+	case lexer.PLUS:
+		return +right.(float64)
+	case lexer.NOT:
+		return !right.(bool)
+	}
+	return nil
+}
+
+func (r *Runner) evaluateAssignmentExpression(e *ast.AssignmentExpression) any {
+	r.RegisterVariable(r.MainPackage(), r.GetVariable(r.MainPackage(), e.Assigne.(*ast.SymbolExpression).Value))
+	r.GetVariable(r.MainPackage(), e.Assigne.(*ast.SymbolExpression).Value).AssignedValue = &ast.NumberExpression{Value: r.Evaluate(e.Value).(float64)}
+	variable := r.GetVariable(r.MainPackage(), e.Assigne.(*ast.SymbolExpression).Value)
+	return variable
+
 }

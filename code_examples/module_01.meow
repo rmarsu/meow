@@ -1,11 +1,13 @@
-import math "code_examples/module_02.meow";
-
 var radius = 1;
 const pi = 3.14;
-const ass = math.something;
 
-if (radius < 0) (
-    meow(radius);
-) else (
-    meow(ass);
+void findS(rad int) (int) (
+    return rad * rad * pi;
 );
+
+for (radius != 10) (
+    radius = radius + 1;
+    meow(findS(radius));
+);
+
+meow("timeless journeys always are familiar...");

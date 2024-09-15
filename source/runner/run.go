@@ -14,10 +14,10 @@ type Runner struct {
 }
 
 type Memory struct {
-	Variables map[string]*ast.VariableDecStatement
-	Functions map[string]*ast.FunctionDecStatement
-	Classes   map[string]*ast.ClassDecStatement
-	ClassesInstances   map[string]*ast.ClassInstance
+	Variables        map[string]*ast.VariableDecStatement
+	Functions        map[string]*ast.FunctionDecStatement
+	Classes          map[string]*ast.ClassDecStatement
+	ClassesInstances map[string]*ast.ClassInstance
 }
 
 func NewRunner() *Runner {
@@ -26,13 +26,17 @@ func NewRunner() *Runner {
 	}
 }
 
-func (r *Runner) Run(tree *ast.BlockStatement, packagename string) {
+func (r *Runner) Run(tree *ast.BlockStatement, packagename string) []any {
 	for _, stmt := range tree.Statements {
-		r.Execute(stmt, packagename)
+		returning := r.Execute(stmt, packagename)
+		if returning != nil {
+			return returning
+		}
 	}
+	return nil
 }
 
-func (r *Runner) Execute(s ast.Statement, packagename string) {
+func (r *Runner) Execute(s ast.Statement, packagename string) []any {
 	pkg := r.initPackage(packagename)
 	switch stmt := s.(type) {
 	case *ast.ImportStatement:
@@ -46,7 +50,7 @@ func (r *Runner) Execute(s ast.Statement, packagename string) {
 	case *ast.BlockStatement:
 		r.Run(stmt, packagename)
 	case *ast.ReturnStatement:
-		r.RunReturnStatement(stmt)
+		return r.RunReturnStatement(stmt)
 	case *ast.IfStatement:
 		r.RunIfStatement(stmt, packagename)
 	case *ast.PrintStatement:
@@ -56,4 +60,5 @@ func (r *Runner) Execute(s ast.Statement, packagename string) {
 	case *ast.WhileStatement:
 		r.RunWhileStatement(stmt)
 	}
+	return nil
 }

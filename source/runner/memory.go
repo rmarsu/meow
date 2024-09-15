@@ -6,6 +6,19 @@ func (r *Runner) GetPackage(filepath string) *Package {
 	return r.Packages[filepath]
 }
 
+func (r *Runner) RegisterPackage(filepath string) *Package {
+	pkg := &Package{
+        Memory: Memory{
+            Variables: make(map[string]*ast.VariableDecStatement),
+            Functions: make(map[string]*ast.FunctionDecStatement),
+            Classes:   make(map[string]*ast.ClassDecStatement),
+            ClassesInstances: make(map[string]*ast.ClassInstance),
+        },
+    }
+    r.Packages[filepath] = pkg
+    return pkg
+}
+
 func (r *Runner) RegisterVariable(pkg *Package, varDec *ast.VariableDecStatement) {
 	pkg.Memory.Variables[varDec.Name] = varDec
 }
