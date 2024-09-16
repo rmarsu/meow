@@ -78,6 +78,7 @@ func createTokenLookups() {
 	nud(lexer.LPAR, parseGroupingExpressions)
 
 	led(lexer.LBRAK, CALL, parseArrayInstanceExpressions)
+	nud(lexer.LBRAK, parseArrayDecExpression)
 	nud(lexer.EXCLAMINATION_MARK, parseClassInstanceExpressions)
 	led(lexer.LPAR, CALL, parseFunctionInstanceExpression)
 	led(lexer.DOT, MEMBER, parseMemberInstanceExpression)

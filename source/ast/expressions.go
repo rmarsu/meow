@@ -77,8 +77,14 @@ type FunctionInstance struct {
 func (fi FunctionInstance) expression() {}
 
 type MemberInstance struct {
-	Instance Expression
+	Instance   Expression
 	MemberName string
 }
 
 func (mi MemberInstance) expression() {}
+
+type ArrayDeclaration struct {
+	Elements []Expression
+}
+
+func (ad ArrayDeclaration) expression() {}

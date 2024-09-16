@@ -25,6 +25,8 @@ func (r *Runner) Evaluate(expr ast.Expression) any {
 		return r.evaluateAssignmentExpression(e)
 	case *ast.ArrayInstance:
 		return r.evaluateArrayInstance(e)
+	case *ast.ArrayDeclaration:
+		return r.evaluateArrayDeclaration(e)
 	}
 	return nil
 }
@@ -132,10 +134,24 @@ func (r *Runner) evaluateAssignmentExpression(e *ast.AssignmentExpression) any {
 }
 
 func (r *Runner) evaluateArrayInstance(e *ast.ArrayInstance) any {
-	underlying := r.Evaluate(e.Underlying).(string)
+	underlying := r.Evaluate(e.Underlying)
 	var indexes []any
 	for _, index := range e.Content {
 		indexes = append(indexes, r.Evaluate(index))
 	}
-	return string(underlying[int(indexes[0].(float64))])
+	switch underlying := underlying.(type) {
+	case string:
+		return string(underlying[int(indexes[0].(float64))])
+	case []any:
+		return underlying[int(indexes[0].(float64))]
+	}
+	return nil
+}
+
+func (r *Runner) evaluateArrayDeclaration(e *ast.ArrayDeclaration) any {
+	var array []any
+	for i := 0; i < len(e.Elements); i++ {
+		array = append(array, r.Evaluate(e.Elements[i]))
+	}
+	return array
 }

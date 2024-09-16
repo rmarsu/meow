@@ -3,14 +3,13 @@ import math "code_examples/module_02.meow";
 var radius = 1;
 const pi = 3.14;
 var i = 0;
+var array = [1, 2, 3, 4, 5 + 1];
 
 void findS(rad int) (int) (
     return rad * rad * pi;
 );
 
-for (radius != 10) (
-    radius = radius + 1;
-    ## meow(findS(radius));
-    meow(math.something[i]);
+for (i != 5) (
+    meow(findS(array[i]));
     i = i + 1;
 );

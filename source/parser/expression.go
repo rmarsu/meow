@@ -152,3 +152,18 @@ func parseMemberInstanceExpression(p *parser, left ast.Expression, bp binding_po
 		MemberName: memberName,
 	}
 }
+
+func parseArrayDecExpression(p *parser) ast.Expression {
+	p.expect(lexer.LBRAK)
+	var elements []ast.Expression
+	for p.hasTokens() && p.getCurrToken().Kind != lexer.RBRAK {
+		elements = append(elements, parseExpression(p, LOGICAL))
+		if p.getCurrToken().Kind != lexer.RBRAK {
+			p.expect(lexer.COMMA)
+		}
+	}
+	p.expect(lexer.RBRAK)
+	return &ast.ArrayDeclaration{
+		Elements: elements,
+	}
+}
