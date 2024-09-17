@@ -8,15 +8,15 @@ func (r *Runner) GetPackage(filepath string) *Package {
 
 func (r *Runner) RegisterPackage(filepath string) *Package {
 	pkg := &Package{
-        Memory: Memory{
-            Variables: make(map[string]*ast.VariableDecStatement),
-            Functions: make(map[string]*ast.FunctionDecStatement),
-            Classes:   make(map[string]*ast.ClassDecStatement),
-            ClassesInstances: make(map[string]*ast.ClassInstance),
-        },
-    }
-    r.Packages[filepath] = pkg
-    return pkg
+		Memory: Memory{
+			Variables:        make(map[string]*ast.VariableDecStatement),
+			Functions:        make(map[string]*ast.FunctionDecStatement),
+			Classes:          make(map[string]*ast.ClassDecStatement),
+			ClassesInstances: make(map[string]*ast.ClassInstance),
+		},
+	}
+	r.Packages[filepath] = pkg
+	return pkg
 }
 
 func (r *Runner) RegisterVariable(pkg *Package, varDec *ast.VariableDecStatement) {
@@ -49,4 +49,20 @@ func (r *Runner) RegisterClassInstance(pkg *Package, classDec *ast.ClassInstance
 
 func (r *Runner) GetClassInstance(pkg *Package, name string) *ast.ClassInstance {
 	return pkg.Memory.ClassesInstances[name]
+}
+
+func (r *Runner) DeleteFromTempVariable(name string) {
+	delete(r.TemporaryMemory.Variables, name)
+}
+
+func (r *Runner) DeleteFromTempFunction(name string) {
+	delete(r.TemporaryMemory.Functions, name)
+}
+
+func (r *Runner) DeleteFromTempClass(name string) {
+	delete(r.TemporaryMemory.Classes, name)
+}
+
+func (r *Runner) DeleteFromTempClassInstance(name string) {
+	delete(r.TemporaryMemory.ClassesInstances, name)
 }

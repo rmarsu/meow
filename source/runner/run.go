@@ -11,6 +11,7 @@ type Package struct {
 
 type Runner struct {
 	Packages map[string]*Package
+	TemporaryMemory Memory
 }
 
 type Memory struct {
@@ -23,6 +24,7 @@ type Memory struct {
 func NewRunner() *Runner {
 	return &Runner{
 		Packages: make(map[string]*Package),
+		TemporaryMemory: Memory{},
 	}
 }
 

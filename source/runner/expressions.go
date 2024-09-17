@@ -170,21 +170,23 @@ func (r *Runner) evaluatePrefixExpression(e *ast.PrefixExpression) any {
 }
 
 func (r *Runner) evaluateAssignmentExpression(e *ast.AssignmentExpression) any {
+	var variableName string
 	switch assign := e.Assigne.(type) {
 	case *ast.SymbolExpression:
-		variableName := assign.Value
-	case *ast.MemberExpression:
-		variableName := assign.
-		
+		variableName = assign.Value
+		r.RegisterVariable(r.MainPackage(), r.GetVariable(r.MainPackage(), variableName))
+		variable := r.GetVariable(r.MainPackage(), variableName)
+		if variable.IsConstant {
+			panic("Нельзя изменять константу")
+		}
+		variable.AssignedValue = &ast.NumberExpression{Value: r.Evaluate(e.Value).(float64)}
+	case *ast.MemberInstance:
+		variableName = assign.Instance.(*ast.SymbolExpression).Value
+		variable := r.GetVariable(r.MainPackage(), variableName)
+		variable.AssignedValue.(*ast.ClassInstance).Fields[assign.MemberName.(*ast.SymbolExpression).Value] = e.Value
 
 	}
-	r.RegisterVariable(r.MainPackage(), r.GetVariable(r.MainPackage(), variableName)
-	variable := r.GetVariable(r.MainPackage(), e.Assigne.(*ast.SymbolExpression).Value)
-	if variable.IsConstant {
-		panic("Нельзя изменять константу")
-	}
-	variable.AssignedValue = &ast.NumberExpression{Value: r.Evaluate(e.Value).(float64)}
-	return variable
+	return nil
 }
 
 func (r *Runner) evaluateArrayInstance(e *ast.ArrayInstance) any {
