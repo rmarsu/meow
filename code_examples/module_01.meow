@@ -11,6 +11,10 @@ class human (
     string honk(int),
 );
 
+void honk(int) (string) (
+    return human.age;
+);
+
 var human1 = ^^human(
     name = "n",
     age = 100,
@@ -20,7 +24,7 @@ for (i != 5) (
     i = i + 1;
 );
 
-meow(human1.name);
+meow(human1.honk(1));
 
 meow(math.findS(2));
 

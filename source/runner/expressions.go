@@ -81,16 +81,30 @@ func (r *Runner) evaluateSymbolExpression(e *ast.SymbolExpression) any {
 func (r *Runner) evaluateMemberInstance(e *ast.MemberInstance) any {
 	name := r.Evaluate(e.Instance)
 	var pkg *Package
+	memberName := (e.MemberName)
 	switch n := name.(type) {
 	case string:
 		pkg = r.GetPackage(n)
 		if pkg == nil {
-			return "package not found"
+			pkg = r.MainPackage()
 		}
 	case *ast.ClassInstance:
-		return r.Evaluate(n.Fields[r.Evaluate(e.MemberName).(string)])
+		switch mB := memberName.(type) {
+		case *ast.SymbolExpression:
+			return r.Evaluate(n.Fields[mB.Value])
+		case *ast.MemberInstance:
+			return r.evaluateMemberInstance(mB)
+		case *ast.FunctionInstance:
+			r.RegisterVariable(r.MainPackage(), &ast.VariableDecStatement{
+				Name:          n.ClassName,
+				AssignedValue: n,
+				Type:          nil,
+				IsConstant:    false,
+			})
+			return r.evaluateFunctionInstance(mB)
+		}
+		return nil
 	}
-	memberName := (e.MemberName)
 	switch mB := memberName.(type) {
 	case *ast.FunctionInstance:
 		function := r.GetFunction(pkg, mB.FunctionName)
