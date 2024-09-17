@@ -8,23 +8,28 @@ var array = [1, 2, 3, 4, 5 + 1];
 class human (
     static string name,
     int age,
-    string honk(int),
+    int date,
+    string honk(),
 );
 
-void honk(int) (string) (
-    return human.age;
+void honk() (string, string) (
+    return human.age + human.date, "hello";
 );
 
 var human1 = ^^human(
-    name = "n",
+    name = "John",
     age = 100,
+    date = 50,
 );
 
-for (i != 5) (
+for (i < len(array)) (
+    meow(array[i]);
     i = i + 1;
 );
 
-meow(human1.honk(1));
+human1.age = 0;
+meow(human1.honk());
+meow(len(human1.name));
 
 meow(math.findS(2));
 

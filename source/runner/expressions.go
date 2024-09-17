@@ -120,6 +120,19 @@ func (r *Runner) evaluateMemberInstance(e *ast.MemberInstance) any {
 }
 
 func (r *Runner) evaluateFunctionInstance(e *ast.FunctionInstance) any {
+	if e.FunctionName == "len" {
+		if len(e.Parameters) > 1 {
+			panic("Неверное число аргументов")
+		}
+		switch param := r.Evaluate(e.Parameters[0]).(type) {
+		case string:
+			return len([]rune(param))
+		case []rune:
+			return len(param)
+		case []any:
+			return float64(len(param))
+		}
+	}
 	function := r.GetFunction(r.MainPackage(), e.FunctionName)
 	if function.Name == "" {
 		panic("функция не найдена")
@@ -157,7 +170,15 @@ func (r *Runner) evaluatePrefixExpression(e *ast.PrefixExpression) any {
 }
 
 func (r *Runner) evaluateAssignmentExpression(e *ast.AssignmentExpression) any {
-	r.RegisterVariable(r.MainPackage(), r.GetVariable(r.MainPackage(), e.Assigne.(*ast.SymbolExpression).Value))
+	switch assign := e.Assigne.(type) {
+	case *ast.SymbolExpression:
+		variableName := assign.Value
+	case *ast.MemberExpression:
+		variableName := assign.
+		
+
+	}
+	r.RegisterVariable(r.MainPackage(), r.GetVariable(r.MainPackage(), variableName)
 	variable := r.GetVariable(r.MainPackage(), e.Assigne.(*ast.SymbolExpression).Value)
 	if variable.IsConstant {
 		panic("Нельзя изменять константу")
