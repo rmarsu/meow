@@ -66,6 +66,21 @@ func parseClassDeclaration(p *parser) ast.Statement {
 		if p.getCurrToken().Kind == lexer.IDENT {
 			fieldType := parseType(p, default_power)
 			fieldName = p.expect(lexer.IDENT).Value
+			if p.getCurrToken().Kind == lexer.LPAR {
+				p.advance()
+				parameters := make([]ast.Type, 0)
+				for p.hasTokens() && p.getCurrToken().Kind!= lexer.RPAR {
+					parameterType := parseType(p, PRIMARY)
+					parameters = append(parameters, parameterType)
+				}
+				p.expect(lexer.RPAR)
+				functionName := fieldName
+				functions[functionName] = ast.ClassFunctionStatement{
+                    Parameters: parameters,
+                    ReturnType: fieldType,
+                    IsStatic:   isStatic,
+                }
+			}
 			p.expect(lexer.COMMA)
 
 			_, exists := fields[fieldName]

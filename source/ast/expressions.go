@@ -13,7 +13,8 @@ func (n NumberExpression) expression() {
 
 // string
 type StringExpression struct {
-	Value []rune
+	Value  []rune
+	Length int
 }
 
 func (s StringExpression) expression() {
@@ -78,13 +79,14 @@ func (fi FunctionInstance) expression() {}
 
 type MemberInstance struct {
 	Instance   Expression
-	MemberName string
+	MemberName Expression
 }
 
 func (mi MemberInstance) expression() {}
 
 type ArrayDeclaration struct {
 	Elements []Expression
+	Length   int
 }
 
 func (ad ArrayDeclaration) expression() {}

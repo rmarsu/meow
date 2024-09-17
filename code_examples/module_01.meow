@@ -5,11 +5,22 @@ const pi = 3.14;
 var i = 0;
 var array = [1, 2, 3, 4, 5 + 1];
 
-void findS(rad int) (int) (
-    return rad * rad * pi;
+class human (
+    static string name,
+    int age,
+    string honk(int),
+);
+
+var human1 = ^^human(
+    name = "n",
+    age = 100,
 );
 
 for (i != 5) (
-    meow(findS(array[i]));
     i = i + 1;
 );
+
+meow(human1.name);
+
+meow(math.findS(2));
+

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"meow/source/ast"
-	"meow/source/ast/helper"
 	"meow/source/lexer"
 	"strconv"
 )
@@ -35,7 +34,8 @@ func parsePrimaryExpressions(p *parser) ast.Expression {
 		number, _ := strconv.ParseFloat(p.advance().Value, 64)
 		return &ast.NumberExpression{Value: number}
 	case lexer.STRING:
-		return &ast.StringExpression{Value: []rune(p.advance().Value)}
+		value := []rune(p.advance().Value)
+		return &ast.StringExpression{Value: value, Length: len(value)}
 	case lexer.IDENT:
 		return &ast.SymbolExpression{Value: p.advance().Value}
 	default:
@@ -126,7 +126,14 @@ func parseArrayInstanceExpressions(p *parser, left ast.Expression, bp binding_po
 }
 
 func parseFunctionInstanceExpression(p *parser, left ast.Expression, bp binding_power) ast.Expression {
-	var functionName = helper.ExpectType[*ast.SymbolExpression](left).Value
+	var functionName string
+	switch l := left.(type) {
+	case *ast.SymbolExpression:
+		functionName = l.Value
+	case *ast.MemberInstance:
+		functionName = l.MemberName.(*ast.SymbolExpression).Value
+
+	}
 	var parameters = []ast.Expression{}
 	p.expect(lexer.LPAR)
 
@@ -146,7 +153,7 @@ func parseFunctionInstanceExpression(p *parser, left ast.Expression, bp binding_
 
 func parseMemberInstanceExpression(p *parser, left ast.Expression, bp binding_power) ast.Expression {
 	p.expect(lexer.DOT)
-	memberName := p.expect(lexer.IDENT).Value
+	memberName := parseExpression(p, bp)
 	return &ast.MemberInstance{
 		Instance:   left,
 		MemberName: memberName,
@@ -165,5 +172,6 @@ func parseArrayDecExpression(p *parser) ast.Expression {
 	p.expect(lexer.RBRAK)
 	return &ast.ArrayDeclaration{
 		Elements: elements,
+		Length:   len(elements),
 	}
 }

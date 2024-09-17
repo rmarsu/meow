@@ -1,1 +1,7 @@
 var something = "something";
+
+const pi = 3.14;
+
+void findS(rad int) (int) (
+    return rad * rad * pi;
+);

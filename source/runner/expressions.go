@@ -27,6 +27,8 @@ func (r *Runner) Evaluate(expr ast.Expression) any {
 		return r.evaluateArrayInstance(e)
 	case *ast.ArrayDeclaration:
 		return r.evaluateArrayDeclaration(e)
+	case *ast.ClassInstance:
+		return r.evaluateClassInstance(e)
 	}
 	return nil
 }
@@ -69,7 +71,7 @@ func (r *Runner) evaluateBinaryExpression(e *ast.BOExpression) any {
 }
 
 func (r *Runner) evaluateSymbolExpression(e *ast.SymbolExpression) any {
-	variable := r.GetVariable(r.Packages["main"], e.Value)
+	variable := r.GetVariable(r.MainPackage(), e.Value)
 	if variable == nil {
 		return e.Value
 	}
@@ -77,13 +79,30 @@ func (r *Runner) evaluateSymbolExpression(e *ast.SymbolExpression) any {
 }
 
 func (r *Runner) evaluateMemberInstance(e *ast.MemberInstance) any {
-	pkg := r.GetPackage(r.Evaluate(e.Instance).(string))
-	if pkg == nil {
-		class := r.GetClassInstance(r.MainPackage(), r.Evaluate(e.Instance).(string))
-		return r.Evaluate(class.Fields[e.MemberName])
+	name := r.Evaluate(e.Instance)
+	var pkg *Package
+	switch n := name.(type) {
+	case string:
+		pkg = r.GetPackage(n)
+		if pkg == nil {
+			return "package not found"
+		}
+	case *ast.ClassInstance:
+		return r.Evaluate(n.Fields[r.Evaluate(e.MemberName).(string)])
 	}
+	memberName := (e.MemberName)
+	switch mB := memberName.(type) {
+	case *ast.FunctionInstance:
+		function := r.GetFunction(pkg, mB.FunctionName)
+		r.RegisterFunction(r.MainPackage(), function)
+		return r.Evaluate(mB)
+	case *ast.MemberInstance:
+		return r.evaluateMemberInstance(mB)
+	case *ast.SymbolExpression:
+		return r.evaluateSymbolExpression(mB)
+	}
+	return nil
 
-	return r.Evaluate(r.GetVariable(pkg, e.MemberName).AssignedValue)
 }
 
 func (r *Runner) evaluateFunctionInstance(e *ast.FunctionInstance) any {
@@ -154,4 +173,8 @@ func (r *Runner) evaluateArrayDeclaration(e *ast.ArrayDeclaration) any {
 		array = append(array, r.Evaluate(e.Elements[i]))
 	}
 	return array
+}
+
+func (r *Runner) evaluateClassInstance(e *ast.ClassInstance) any {
+	return e
 }

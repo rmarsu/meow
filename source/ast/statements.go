@@ -31,6 +31,8 @@ type ClassFieldStatement struct {
 }
 
 type ClassFunctionStatement struct {
+	Parameters []Type
+	ReturnType Type
 	IsStatic bool
 }
 
