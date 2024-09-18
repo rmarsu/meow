@@ -101,7 +101,9 @@ func (r *Runner) evaluateMemberInstance(e *ast.MemberInstance) any {
 				Type:          nil,
 				IsConstant:    false,
 			})
-			return r.evaluateFunctionInstance(mB)
+			val := r.evaluateFunctionInstance(mB)
+			r.DeleteFromTempVariable(n.ClassName)
+			return val
 		}
 		return nil
 	}
@@ -109,7 +111,9 @@ func (r *Runner) evaluateMemberInstance(e *ast.MemberInstance) any {
 	case *ast.FunctionInstance:
 		function := r.GetFunction(pkg, mB.FunctionName)
 		r.RegisterFunction(r.MainPackage(), function)
-		return r.Evaluate(mB)
+		val := r.Evaluate(mB)
+		r.DeleteFromTempFunction(function.Name)
+		return val
 	case *ast.MemberInstance:
 		return r.evaluateMemberInstance(mB)
 	case *ast.SymbolExpression:
@@ -140,17 +144,20 @@ func (r *Runner) evaluateFunctionInstance(e *ast.FunctionInstance) any {
 	if len(e.Parameters) != len(function.Parameters) {
 		panic("Неверное число аргументов")
 	}
+	var addedParams []string
 	for i := range function.Parameters {
 		function.Parameters[i].AssignedValue = e.Parameters[i]
+		addedParams = append(addedParams, function.Parameters[i].Name)
 		r.RegisterVariable(r.MainPackage(), &function.Parameters[i])
 
 	}
 	result := r.Run(function.Body, "main")
-	if len(function.ReturnType) != len(result) {
-		panic("Неверное число возвращаемых значений")
-	}
+
 	if len(result) == 1 {
 		return result[0]
+	}
+	for param := range addedParams {
+		r.DeleteFromTempVariable(addedParams[param])
 	}
 	return result
 }

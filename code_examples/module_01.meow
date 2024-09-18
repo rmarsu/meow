@@ -1,37 +1,5 @@
-import math "code_examples/module_02.meow";
+import math "add_packages/math.meow";
 
-var radius = 1;
-const pi = 3.14;
-var i = 0;
-var array = [1, 2, 3, 4, 5 + 1];
-
-class human (
-    static string name,
-    int age,
-    int date,
-    string honk(),
-);
-
-void honk() (string, string) (
-    return human.age + human.date, len(human.name);
-);
-
-var human1 = ^^human(
-    name = "John",
-    age = 100,
-    date = 50,
-);
-
-for (i < len(array)) (
-    meow(array[i]);
-    i = i + 1;
-);
-
-meow(human1.age);
-human1.age = 0;
-
-meow(human1.honk());
-meow(human1.name);
-
-meow(math.findS(2));
+var number = -121;
+meow(math.abs(number));
 

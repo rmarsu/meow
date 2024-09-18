@@ -52,17 +52,17 @@ func (r *Runner) GetClassInstance(pkg *Package, name string) *ast.ClassInstance 
 }
 
 func (r *Runner) DeleteFromTempVariable(name string) {
-	delete(r.TemporaryMemory.Variables, name)
+	delete(r.MainPackage().Variables, name)
 }
 
 func (r *Runner) DeleteFromTempFunction(name string) {
-	delete(r.TemporaryMemory.Functions, name)
+    delete(r.MainPackage().Functions, name)
 }
 
 func (r *Runner) DeleteFromTempClass(name string) {
-	delete(r.TemporaryMemory.Classes, name)
+    delete(r.MainPackage().Classes, name)
 }
 
 func (r *Runner) DeleteFromTempClassInstance(name string) {
-	delete(r.TemporaryMemory.ClassesInstances, name)
+    delete(r.MainPackage().ClassesInstances, name)
 }

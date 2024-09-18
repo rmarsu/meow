@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"fmt"
 	"meow/source/ast"
 )
 
@@ -29,13 +30,13 @@ func NewRunner() *Runner {
 }
 
 func (r *Runner) Run(tree *ast.BlockStatement, packagename string) []any {
+	returning := []any{}
 	for _, stmt := range tree.Statements {
 		returning := r.Execute(stmt, packagename)
-		if returning != nil {
-			return returning
-		}
+		fmt.Println(returning...)
+		return returning
 	}
-	return nil
+	return returning
 }
 
 func (r *Runner) Execute(s ast.Statement, packagename string) []any {
