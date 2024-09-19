@@ -1,5 +1,6 @@
 import math "add_packages/math.meow";
 
-var number = -121;
+var number = -20;
 meow(math.abs(number));
+meow(math.sqrt(number));
 

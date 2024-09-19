@@ -152,12 +152,11 @@ func (r *Runner) evaluateFunctionInstance(e *ast.FunctionInstance) any {
 
 	}
 	result := r.Run(function.Body, "main")
-
-	if len(result) == 1 {
+	if len(result) > 0 {
 		return result[0]
 	}
-	for param := range addedParams {
-		r.DeleteFromTempVariable(addedParams[param])
+	for _, param := range addedParams {
+		r.DeleteFromTempVariable(param)
 	}
 	return result
 }

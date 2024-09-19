@@ -14,13 +14,15 @@ func (r *Runner) RunReturnStatement(stmt ast.Statement) []any {
 	return values
 }
 
-func (r *Runner) RunIfStatement(stmt ast.Statement, packagename string) {
+func (r *Runner) RunIfStatement(stmt ast.Statement, packagename string) []any {
+	var returned []any
 	ifStmt := stmt.(*ast.IfStatement)
 	if r.Evaluate(ifStmt.Condition).(bool) {
-		r.Run(ifStmt.ThenBlock, packagename)
+		returned = r.Run(ifStmt.ThenBlock, packagename)
 	} else if ifStmt.ElseBlock != nil {
-		r.Run(ifStmt.ElseBlock, packagename)
+		returned = r.Run(ifStmt.ElseBlock, packagename)
 	}
+	return returned
 }
 
 func (r *Runner) RunPrintStatement(stmt ast.Statement) {

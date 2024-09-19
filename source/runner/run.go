@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"fmt"
 	"meow/source/ast"
 )
 
@@ -11,7 +10,7 @@ type Package struct {
 }
 
 type Runner struct {
-	Packages map[string]*Package
+	Packages        map[string]*Package
 	TemporaryMemory Memory
 }
 
@@ -24,19 +23,19 @@ type Memory struct {
 
 func NewRunner() *Runner {
 	return &Runner{
-		Packages: make(map[string]*Package),
+		Packages:        make(map[string]*Package),
 		TemporaryMemory: Memory{},
 	}
 }
 
 func (r *Runner) Run(tree *ast.BlockStatement, packagename string) []any {
-	returning := []any{}
 	for _, stmt := range tree.Statements {
-		returning := r.Execute(stmt, packagename)
-		fmt.Println(returning...)
-		return returning
+		returnedValue := r.Execute(stmt, packagename)
+		if returnedValue != nil {
+            return returnedValue
+        }
 	}
-	return returning
+	return nil
 }
 
 func (r *Runner) Execute(s ast.Statement, packagename string) []any {
@@ -52,16 +51,16 @@ func (r *Runner) Execute(s ast.Statement, packagename string) []any {
 		r.RegisterVariable(pkg, stmt)
 	case *ast.BlockStatement:
 		r.Run(stmt, packagename)
-	case *ast.ReturnStatement:
-		return r.RunReturnStatement(stmt)
 	case *ast.IfStatement:
-		r.RunIfStatement(stmt, packagename)
+		return r.RunIfStatement(stmt, packagename)
 	case *ast.PrintStatement:
 		r.RunPrintStatement(stmt)
 	case *ast.ExpressionStatement:
 		r.RunExpressionStatement(stmt)
 	case *ast.WhileStatement:
 		r.RunWhileStatement(stmt)
+	case *ast.ReturnStatement:
+		return r.RunReturnStatement(stmt)
 	}
 	return nil
 }
