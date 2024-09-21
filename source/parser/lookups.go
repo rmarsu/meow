@@ -60,10 +60,10 @@ func createTokenLookups() {
 	led(lexer.AND, LOGICAL, parseBinaryExpressions)
 	led(lexer.OR, LOGICAL, parseBinaryExpressions)
 
-	led(lexer.LESS, RELATIONAL, parseBinaryExpressions)
 	led(lexer.LESS_EQUALS, RELATIONAL, parseBinaryExpressions)
-	led(lexer.GREATER, RELATIONAL, parseBinaryExpressions)
 	led(lexer.GREATER_EQUALS, RELATIONAL, parseBinaryExpressions)
+	led(lexer.LESS, RELATIONAL, parseBinaryExpressions)
+	led(lexer.GREATER, RELATIONAL, parseBinaryExpressions)
 	led(lexer.EQUALS, RELATIONAL, parseBinaryExpressions)
 	led(lexer.NOT_EQUALS, RELATIONAL, parseBinaryExpressions)
 
@@ -76,6 +76,8 @@ func createTokenLookups() {
 	nud(lexer.STRING, parsePrimaryExpressions)
 	nud(lexer.IDENT, parsePrimaryExpressions)
 	nud(lexer.LPAR, parseGroupingExpressions)
+	nud(lexer.TRUE, parsePrimaryExpressions)
+	nud(lexer.FALSE, parsePrimaryExpressions)
 
 	led(lexer.LBRAK, CALL, parseArrayInstanceExpressions)
 	nud(lexer.LBRAK, parseArrayDecExpression)
@@ -90,6 +92,5 @@ func createTokenLookups() {
 	statement(lexer.RETURN, parseReturnStatement)
 	statement(lexer.IF, parseIfStatement)
 	statement(lexer.FOR, parseWhileStatement)
-	statement(lexer.MEOW, parsePrintStatement)
 	statement(lexer.IMPORT, parseImportStatement)
 }

@@ -90,3 +90,9 @@ type ArrayDeclaration struct {
 }
 
 func (ad ArrayDeclaration) expression() {}
+
+type BooleanExpression struct {
+	Value bool
+}
+
+func (be BooleanExpression) expression() {}

@@ -38,6 +38,12 @@ func parsePrimaryExpressions(p *parser) ast.Expression {
 		return &ast.StringExpression{Value: value, Length: len(value)}
 	case lexer.IDENT:
 		return &ast.SymbolExpression{Value: p.advance().Value}
+	case lexer.TRUE:
+		p.advance()
+		return &ast.BooleanExpression{Value: true}
+    case lexer.FALSE:
+		p.advance()
+		return &ast.BooleanExpression{Value: false}
 	default:
 		p.errors = append(p.errors, errors.New("невозможно создать первичное выражение"))
 		return nil

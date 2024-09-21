@@ -6,6 +6,7 @@ import (
 	"meow/source/lexer"
 	"meow/source/parser"
 	"meow/source/runner"
+	"meow/source/runner/object"
 	"os"
 	"path/filepath"
 
@@ -31,8 +32,8 @@ func Start(_filepath string) {
 	if err != nil {
 		panic(err)
 	}
-	runner := runner.NewRunner()
-	runner.Run(&ast, "main")
+	env := object.NewEnvironment()
+	runner.ExecuteProgram(ast, env)
 }
 
 func DebugTree(filepath string) {

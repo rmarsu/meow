@@ -17,7 +17,7 @@ func (es ExpressionStatement) statement() {
 }
 
 type VariableDecStatement struct {
-	Name          string
+	Names          []string
 	IsConstant    bool
 	Type          Type
 	AssignedValue Expression
@@ -33,7 +33,7 @@ type ClassFieldStatement struct {
 type ClassFunctionStatement struct {
 	Parameters []Type
 	ReturnType Type
-	IsStatic bool
+	IsStatic   bool
 }
 
 type ClassDecStatement struct {
@@ -74,11 +74,6 @@ type WhileStatement struct {
 
 func (ws WhileStatement) statement() {}
 
-type PrintStatement struct {
-	Input Expression
-}
-
-func (pe PrintStatement) statement() {}
 
 type ImportStatement struct {
 	ImportName  string
@@ -86,6 +81,3 @@ type ImportStatement struct {
 }
 
 func (is ImportStatement) statement() {}
-
-
-

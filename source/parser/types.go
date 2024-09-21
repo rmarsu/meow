@@ -34,19 +34,19 @@ func createTokenTypeLookups() {
 }
 
 func parseSymbolType(p *parser) ast.Type {
-	return ast.SymbolType{
+	return &ast.SymbolType{
 		Name: p.expect(lexer.IDENT).Value,
 	}
 }
 
 func parseArrayType(p *parser) ast.Type {
-     p.advance() // eat '['
+	p.advance() // eat '['
 	p.expect(lexer.RBRAK)
-     innerType := parseType(p, PRIMARY)
+	innerType := parseType(p, PRIMARY)
 	// fmt.Println("returned")
-     return ast.ArrayType{
-          Underlying: innerType,
-     }
+	return &ast.ArrayType{
+		Underlying: innerType,
+	}
 }
 
 func parseType(p *parser, bp binding_power) ast.Type {

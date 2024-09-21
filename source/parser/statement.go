@@ -22,6 +22,7 @@ func parseVariableDeclaration(p *parser) ast.Statement {
 	var expilitType ast.Type
 	var assigmentValue ast.Expression
 	var IsConstant bool
+	var names []string
 	if p.getCurrToken().Kind == lexer.VAR {
 		p.advance()
 		IsConstant = false
@@ -29,7 +30,14 @@ func parseVariableDeclaration(p *parser) ast.Statement {
 		p.advance()
 		IsConstant = true
 	}
-	name := p.expect(lexer.IDENT)
+	for p.hasTokens() && p.getCurrToken().Kind != lexer.ASSIGN {
+		name := p.getCurrToken().Value
+		names = append(names, name)
+		p.advance()
+		if p.getCurrToken().Kind != lexer.ASSIGN {
+			p.expect(lexer.COMMA)
+		}
+	}
 
 	if p.getCurrToken().Kind == lexer.ASSIGN {
 		p.advance()
@@ -42,7 +50,7 @@ func parseVariableDeclaration(p *parser) ast.Statement {
 	p.expect(lexer.SEMICOLON)
 
 	return &ast.VariableDecStatement{
-		Name:          name.Value,
+		Names:         names,
 		IsConstant:    IsConstant,
 		AssignedValue: assigmentValue,
 		Type:          expilitType,
@@ -69,17 +77,17 @@ func parseClassDeclaration(p *parser) ast.Statement {
 			if p.getCurrToken().Kind == lexer.LPAR {
 				p.advance()
 				parameters := make([]ast.Type, 0)
-				for p.hasTokens() && p.getCurrToken().Kind!= lexer.RPAR {
+				for p.hasTokens() && p.getCurrToken().Kind != lexer.RPAR {
 					parameterType := parseType(p, PRIMARY)
 					parameters = append(parameters, parameterType)
 				}
 				p.expect(lexer.RPAR)
 				functionName := fieldName
 				functions[functionName] = ast.ClassFunctionStatement{
-                    Parameters: parameters,
-                    ReturnType: fieldType,
-                    IsStatic:   isStatic,
-                }
+					Parameters: parameters,
+					ReturnType: fieldType,
+					IsStatic:   isStatic,
+				}
 			}
 			p.expect(lexer.COMMA)
 
@@ -117,8 +125,10 @@ func parseFunctionDeclaration(p *parser) ast.Statement {
 		if p.getCurrToken().Kind != lexer.RPAR {
 			p.expect(lexer.COMMA)
 		}
+		var names []string
+		names = append(names, paramName)
 		params = append(params, ast.VariableDecStatement{
-			Name:          paramName,
+			Names:         names,
 			IsConstant:    false,
 			AssignedValue: nil,
 			Type:          paramType,
@@ -202,46 +212,35 @@ func parseWhileStatement(p *parser) ast.Statement {
 	p.expect(lexer.FOR)
 	p.expect(lexer.LPAR)
 	var conditions []ast.Expression
-	for p.hasTokens() && p.getCurrToken().Kind!= lexer.RPAR {
+	for p.hasTokens() && p.getCurrToken().Kind != lexer.RPAR {
 		conditions = append(conditions, parseExpression(p, LOGICAL))
-          if p.getCurrToken().Kind!= lexer.RPAR {
-               p.expect(lexer.SEMICOLON)
-          }
-	} 
+		if p.getCurrToken().Kind != lexer.RPAR {
+			p.expect(lexer.SEMICOLON)
+		}
+	}
 	p.expect(lexer.RPAR)
 	p.expect(lexer.LPAR)
 	var body []ast.Statement
-	for p.hasTokens() && p.getCurrToken().Kind!= lexer.RPAR {
-          body = append(body, parseStatement(p))
-     }
+	for p.hasTokens() && p.getCurrToken().Kind != lexer.RPAR {
+		body = append(body, parseStatement(p))
+	}
 	p.expect(lexer.RPAR)
 	p.expect(lexer.SEMICOLON)
 	return &ast.WhileStatement{
 		Conditions: conditions,
-          Body: &ast.BlockStatement{
-               Statements: body,
-          },
+		Body: &ast.BlockStatement{
+			Statements: body,
+		},
 	}
-}
-
-func parsePrintStatement(p *parser) ast.Statement {
-	p.expect(lexer.MEOW)
-    p.expect(lexer.LPAR)
-    expression := parseExpression(p, default_power)
-    p.expect(lexer.RPAR)
-    p.expect(lexer.SEMICOLON)
-    return &ast.PrintStatement{
-		Input: expression,
-    }
 }
 
 func parseImportStatement(p *parser) ast.Statement {
 	p.expect(lexer.IMPORT)
 	name := p.expect(lexer.IDENT).Value
-    path := p.expect(lexer.STRING).Value
-    p.expect(lexer.SEMICOLON)
-    return &ast.ImportStatement{
-		ImportName: name,
-        PackagePath: path,
-    }
+	path := p.expect(lexer.STRING).Value
+	p.expect(lexer.SEMICOLON)
+	return &ast.ImportStatement{
+		ImportName:  name,
+		PackagePath: path,
+	}
 }

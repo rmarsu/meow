@@ -1,6 +1,21 @@
-import math "add_packages/math.meow";
+void addStrings(string1 string , string2 string) (string, bool) (
+    return string1 + " " + string2, false;
+);
 
-var number = -20;
-meow(math.abs(number));
-meow(math.sqrt(number));
+var stringg, status = addStrings("Hello", "world!");
+var arrayg = [0];
+meow(stringg);
+
+var i = 0;
+for (i < len(stringg)) (
+    arrayg = tail(arrayg, i);
+    meow(stringg[i]);
+    i = i + 1;
+);
+
+meow(arrayg);
+
+if (status == false) (
+    meow("false status");
+);
 
