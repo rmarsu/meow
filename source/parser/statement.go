@@ -72,33 +72,46 @@ func parseClassDeclaration(p *parser) ast.Statement {
 			p.expect(lexer.STATIC)
 		}
 		if p.getCurrToken().Kind == lexer.IDENT {
-			fieldType := parseType(p, default_power)
 			fieldName = p.expect(lexer.IDENT).Value
 			if p.getCurrToken().Kind == lexer.LPAR {
-				p.advance()
+				p.advance() // eat '('
 				parameters := make([]ast.Type, 0)
 				for p.hasTokens() && p.getCurrToken().Kind != lexer.RPAR {
 					parameterType := parseType(p, PRIMARY)
 					parameters = append(parameters, parameterType)
 				}
 				p.expect(lexer.RPAR)
+				var returnValues []ast.Type
+				if p.getCurrToken().Kind == lexer.LPAR {
+					p.advance()
+					for p.hasTokens() && p.getCurrToken().Kind != lexer.RPAR {
+						returnValueType := parseType(p, PRIMARY)
+						returnValues = append(returnValues, returnValueType)
+						if p.getCurrToken().Kind != lexer.RPAR {
+							p.expect(lexer.COMMA)
+						}
+					}
+				}
+				p.expect(lexer.RPAR)
 				functionName := fieldName
 				functions[functionName] = ast.ClassFunctionStatement{
-					Parameters: parameters,
-					ReturnType: fieldType,
-					IsStatic:   isStatic,
+					Parameters:  parameters,
+					IsStatic:    isStatic,
+					ReturnTypes: returnValues,
+				}
+			} else {
+				fieldType := parseType(p, default_power)
+				_, exists := fields[fieldName]
+				if exists {
+					panic("!! Данное поле уже было указано в классе")
+				}
+				fields[fieldName] = ast.ClassFieldStatement{
+					Type:     fieldType,
+					IsStatic: isStatic,
 				}
 			}
 			p.expect(lexer.COMMA)
 
-			_, exists := fields[fieldName]
-			if exists {
-				panic("!! Данное поле уже было указано в классе")
-			}
-			fields[fieldName] = ast.ClassFieldStatement{
-				Type:     fieldType,
-				IsStatic: isStatic,
-			}
 			continue
 		}
 	}
