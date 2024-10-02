@@ -287,6 +287,8 @@ func evaluateSymbolExpression(node *ast.SymbolExpression, env *object.Environmen
 
 func evaluateBOExpression(operator lexer.TokenKind, left, right object.Object) object.Object {
 	switch {
+	case left.Type() == object.FLOAT && right.Type() == object.FLOAT:
+		return evalFloatBOExpression(operator, left, right)
 	case left.Type() == object.INTEGER && right.Type() == object.INTEGER:
 		return evalIntegerBOExpression(operator, left, right)
 	case left.Type() == object.STRING && right.Type() == object.STRING:
@@ -294,6 +296,40 @@ func evaluateBOExpression(operator lexer.TokenKind, left, right object.Object) o
 	}
 	return newError("Невозможно бинарное действие типов %s, %s", left.Type(), right.Type())
 
+}
+
+func evalFloatBOExpression(operator lexer.TokenKind, left, right object.Object) object.Object {
+	if left.Type() != right.Type() {
+		return newError("Нельзя выполнить операцию с разными типами: %s, %s", left.Type(), right.Type())
+	}
+	leftVal := left.(*object.Float).Value
+	rightVal := right.(*object.Float).Value
+	switch operator {
+	case lexer.PLUS:
+		return &object.Float{Value: leftVal + rightVal}
+	case lexer.MINUS:
+		return &object.Float{Value: leftVal - rightVal}
+	case lexer.MUL:
+		return &object.Float{Value: leftVal * rightVal}
+	case lexer.DIV:
+		if rightVal == 0 {
+			return newError("Деление на ноль")
+		}
+		return &object.Float{Value: leftVal / rightVal}
+	case lexer.EQUALS:
+		return nativeBoolToBooleanObject(leftVal == rightVal)
+	case lexer.NOT_EQUALS:
+		return nativeBoolToBooleanObject(leftVal != rightVal)
+	case lexer.LESS:
+		return nativeBoolToBooleanObject(leftVal < rightVal)
+	case lexer.GREATER:
+		return nativeBoolToBooleanObject(leftVal > rightVal)
+	case lexer.GREATER_EQUALS:
+		return nativeBoolToBooleanObject(leftVal >= rightVal)
+	case lexer.LESS_EQUALS:
+		return nativeBoolToBooleanObject(leftVal <= rightVal)
+	}
+	return newError("invalid")
 }
 
 func evalIntegerBOExpression(operator lexer.TokenKind, left, right object.Object) object.Object {

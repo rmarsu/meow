@@ -1,0 +1,9 @@
+var num1 = 14.2;
+var num2 = 14.4;
+
+if (num1 > num2) (
+    meow(num1);
+    meow(num2);
+) else (
+    meow("ajnfjewnfns");
+);
