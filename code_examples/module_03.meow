@@ -6,7 +6,7 @@ class Person (
 
 class Dog (
      klichka string,
-     age int,
+     age float,
 );
 
 var persona = ^^Person(
@@ -17,7 +17,7 @@ var persona = ^^Person(
 
 var dog = ^^Dog(
      klichka = "Bebe",
-     age = 2,
+     age = 2.2,
 );
 
 void ShowPerson(per Person) () (
@@ -26,10 +26,13 @@ void ShowPerson(per Person) () (
      meow(per.age);     
 );
 
-void ShowDog(d Dog) () (
-     meow(d.klichka);
-     meow(d.age);
+void ChangeDogName(d Dog, name string) () (
+     d.klichka = name;
 );
 
-ShowPerson(persona);
-ShowDog(dog);
+meow(dog.klichka);
+ChangeDogName(dog, "боблин");
+meow(dog.klichka);
+
+
+## няшный комментарий

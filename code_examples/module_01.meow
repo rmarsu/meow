@@ -1,5 +1,5 @@
 var num1 = 15.2;
-var num2 = -15.2;
+var num2 = -18.2;
 
 void sum(a float, b float) (float) (
     return num1 + num2;
@@ -17,7 +17,4 @@ void div(a float, b float) (float) (
     return num1 / num2;
 );
 
-meow(sum(num1, num2));
-meow(min(num1, num2));
-meow(mul(num1, num2));
-meow(div(num1, num2));
+meow("The results: " , sum(num1, num2), " ", min(num1, num2), " ", mul(num1, num2), " ", div(num1, num2));

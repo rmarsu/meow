@@ -15,18 +15,49 @@ func Evaluate(node ast.Expression, env *object.Environment) object.Object {
 	case *ast.ClassInstance:
 		return evaluateClassInstance(node, env)
 	case *ast.MemberInstance:
-		instance := node.Instance.(*ast.SymbolExpression).Value
+		var inst string
 		member := node.MemberName
-		value := evaluateMemberInstance(instance, member, env)
+		switch instance := node.Instance.(type) {
+		case *ast.SymbolExpression:
+			inst = instance.Value
+		case *ast.FunctionInstance:
+			returnVal := Evaluate(instance, env)
+			if returnVal.(*object.ReturnValue).Values[0].Type() != object.CLASS {
+				return newError("Функция не возвращает обьект класса")
+			} else {
+				mem := node.MemberName.(*ast.SymbolExpression).Value
+				return returnVal.(*object.ReturnValue).Values[0].(*object.Class).Fields[mem]
+			}
+
+		}
+		value := evaluateMemberInstance(inst, member, env)
 		return value
 	case *ast.AssignmentExpression:
 		value := Evaluate(node.Value, env)
-		assigne := node.Assigne.(*ast.SymbolExpression).Value
 		if IsError(value) {
 			return value
 		}
-		env.Set(assigne, value)
-		return value
+		switch assigne := node.Assigne.(type) {
+		case *ast.SymbolExpression:
+			env.Set(assigne.Value, value)
+			return value
+		case *ast.MemberInstance:
+			parent := assigne.Instance.(*ast.SymbolExpression).Value
+			member := assigne.MemberName.(*ast.SymbolExpression).Value
+			class, ok := env.Get(parent)
+			if !ok {
+				return newError(fmt.Sprintf("Переменная '%s' не найдена в окружении", parent))
+			}
+			if class.Type() != object.CLASS {
+				return newError(fmt.Sprintf("Объект '%s' не является экземпляром класса", parent))
+			}
+			class.(*object.Class).Fields[member] = value
+			env.Set(parent, class)
+			return value
+
+		default:
+			return &object.Error{Message: fmt.Sprintf("Невозможно записать в тип: %T", assigne)}
+		}
 	case *ast.NumberExpression:
 		if isWhole(node.Value) {
 			return &object.Integer{Value: int64(node.Value)}
@@ -204,6 +235,9 @@ func evaluateClassInstance(node *ast.ClassInstance, env *object.Environment) obj
 	if !ok {
 		return newError("Класс %s не найден", node.ClassName)
 	}
+	if parentClass.Type() != object.CLASS {
+		return newError("Неверный класс родитель %s", node.ClassName)
+	}
 	class := parentClass.(*object.Class)
 	var fields = make(map[string]object.Object)
 	for index, expr := range node.Fields {
@@ -277,6 +311,9 @@ func extendFunctionEnv(fn *object.FunctionLiteral, args []object.Object) *object
 }
 
 func unwrapReturn(obj object.Object, _types []object.ObjectType) object.Object {
+	if len(_types) == 0 {
+		return NULL
+	}
 	if returnValue, ok := obj.(*object.ReturnValue); ok {
 		if len(returnValue.Values) != len(_types) {
 			return newError("Ожидалось к возврату: %d. Получено : %d", len(_types), len(returnValue.Values))
@@ -288,7 +325,7 @@ func unwrapReturn(obj object.Object, _types []object.ObjectType) object.Object {
 		}
 		return returnValue
 	}
-	return obj
+	return newError("Функция ничего не возвращает")
 }
 
 func EvaluateExpressions(exprs []ast.Expression, env *object.Environment) []object.Object {
@@ -509,6 +546,8 @@ func Execute(node ast.Statement, env *object.Environment) object.Object {
 				returnTypes = append(returnTypes, object.ARRAY)
 			} else if _type.(*ast.SymbolType).Name == "float" {
 				returnTypes = append(returnTypes, object.FLOAT)
+			} else {
+				returnTypes = append(returnTypes, object.CLASS)
 			}
 		}
 		function := &object.FunctionLiteral{
@@ -564,6 +603,10 @@ func EvaluateClassField(variable ast.ClassFieldStatement, env *object.Environmen
 		return &object.Integer{}
 	case "bool":
 		return &object.Boolean{}
+	case "float":
+		return &object.Float{}
+	case "array":
+		return &object.Array{}
 	}
 	return newError("Неизвестный тип поля: %s", variable.Type.(*ast.SymbolType).Name)
 }
