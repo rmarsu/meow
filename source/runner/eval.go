@@ -56,9 +56,27 @@ func Evaluate(node ast.Expression, env *object.Environment) object.Object {
 		defaults := checkForDefault(node.FunctionName)
 		if defaults {
 			switch node.FunctionName {
-			case "meow":
+			case "typeof":
 				arg := Evaluate(node.Parameters[0], env)
-				fmt.Println(arg.Inspect())
+				return &object.String{Value: []rune(arg.Type())}
+			case "string":
+				arg := Evaluate(node.Parameters[0], env)
+				if arg.Type() == object.FLOAT || arg.Type() == object.INTEGER {
+					return &object.String{Value: []rune(arg.Inspect())}
+				}
+				return newError("Невозможно привести тип данных %s к строке", arg.Type())
+			case "meow":
+				args := EvaluateExpressions(node.Parameters, env)
+				if len(args) == 1 {
+					fmt.Println(args[0].Inspect())
+					return nil
+				}
+				for _, arg := range args {
+					if IsError(arg) {
+						return arg
+					}
+					fmt.Print(arg.Inspect())
+				}
 				return nil
 			case "len":
 				value := Evaluate(node.Parameters[0], env)
@@ -95,8 +113,18 @@ func Evaluate(node ast.Expression, env *object.Environment) object.Object {
 			return newError("Неизвестная функция: %s", node.FunctionName)
 		}
 		args := EvaluateExpressions(node.Parameters, env)
-		if len(args) == 1 {
-			return args[0]
+		params := functionObject.(*object.FunctionLiteral).Parameters
+		if len(args) != len(params) {
+			return newError("Неверное число аргументов для функции %s. Ожидается %d, но получено %d",
+				node.FunctionName, len(params), len(args))
+		}
+		for i, arg := range args {
+			if arg.Type() == object.CLASS {
+				class := arg.(*object.Class)
+				if class.Name != params[i].Type.(*ast.SymbolType).Name {
+					return newError("Неверный объект %s для параметра %s", class.Name, params[i].Type.(*ast.SymbolType).Name)
+				}
+			}
 		}
 		return applyFunction(functionObject, args)
 	case *ast.ArrayDeclaration:
@@ -250,6 +278,9 @@ func extendFunctionEnv(fn *object.FunctionLiteral, args []object.Object) *object
 
 func unwrapReturn(obj object.Object, _types []object.ObjectType) object.Object {
 	if returnValue, ok := obj.(*object.ReturnValue); ok {
+		if len(returnValue.Values) != len(_types) {
+			return newError("Ожидалось к возврату: %d. Получено : %d", len(_types), len(returnValue.Values))
+		}
 		for i := 0; i < len(returnValue.Values); i++ {
 			if returnValue.Values[i].Type() != _types[i] {
 				return newError("Невозможно привести возвращаемое значение к %s", _types[i])
@@ -291,11 +322,58 @@ func evaluateBOExpression(operator lexer.TokenKind, left, right object.Object) o
 		return evalFloatBOExpression(operator, left, right)
 	case left.Type() == object.INTEGER && right.Type() == object.INTEGER:
 		return evalIntegerBOExpression(operator, left, right)
+	case left.Type() == object.FLOAT && right.Type() == object.INTEGER:
+		return evalFloatIntegerBOExpression(operator, left, right)
+	case left.Type() == object.INTEGER && right.Type() == object.FLOAT:
+		return evalFloatIntegerBOExpression(operator, left, right)
 	case left.Type() == object.STRING && right.Type() == object.STRING:
 		return evalStringBOExpression(operator, left, right)
 	}
 	return newError("Невозможно бинарное действие типов %s, %s", left.Type(), right.Type())
 
+}
+
+func evalFloatIntegerBOExpression(operator lexer.TokenKind, left, right object.Object) object.Object {
+	var leftVal float64
+	var rightVal float64
+	switch l := left.(type) {
+	case *object.Float:
+		leftVal = l.Value
+	case *object.Integer:
+		leftVal = float64(l.Value)
+	}
+	switch r := right.(type) {
+	case *object.Float:
+		rightVal = r.Value
+	case *object.Integer:
+		rightVal = float64(r.Value)
+	}
+	switch operator {
+	case lexer.PLUS:
+		return &object.Float{Value: (leftVal) + (rightVal)}
+	case lexer.MINUS:
+		return &object.Float{Value: (leftVal) - (rightVal)}
+	case lexer.MUL:
+		return &object.Float{Value: (leftVal) * (rightVal)}
+	case lexer.DIV:
+		if rightVal == 0 {
+			return newError("Деление на ноль")
+		}
+		return &object.Float{Value: (leftVal) / (rightVal)}
+	case lexer.EQUALS:
+		return nativeBoolToBooleanObject(leftVal == rightVal)
+	case lexer.NOT_EQUALS:
+		return nativeBoolToBooleanObject(leftVal != rightVal)
+	case lexer.LESS:
+		return nativeBoolToBooleanObject(leftVal < rightVal)
+	case lexer.GREATER:
+		return nativeBoolToBooleanObject(leftVal > rightVal)
+	case lexer.GREATER_EQUALS:
+		return nativeBoolToBooleanObject(leftVal >= rightVal)
+	case lexer.LESS_EQUALS:
+		return nativeBoolToBooleanObject(leftVal <= rightVal)
+	}
+	return newError("invalid")
 }
 
 func evalFloatBOExpression(operator lexer.TokenKind, left, right object.Object) object.Object {
@@ -382,12 +460,14 @@ func evalStringBOExpression(operator lexer.TokenKind, left, right object.Object)
 }
 
 func evalMinusOperatorExpr(right object.Object) object.Object {
-	if right.Type() != (object.INTEGER) {
-		panic(fmt.Sprintf("unknown operand type for '-' operator: %s", right.Type()))
+	switch r := right.(type) {
+	case *object.Integer:
+		return &object.Integer{Value: -r.Value}
+	case *object.Float:
+		return &object.Float{Value: -r.Value}
+	default:
+		return newError("Нельзя унарно вызвать оператор '-' для объекта %s", r.Type())
 	}
-
-	value := right.(*object.Integer).Value
-	return &object.Integer{Value: -value}
 }
 
 func Execute(node ast.Statement, env *object.Environment) object.Object {
@@ -427,6 +507,8 @@ func Execute(node ast.Statement, env *object.Environment) object.Object {
 				returnTypes = append(returnTypes, object.INTEGER)
 			} else if _type.(*ast.SymbolType).Name == "array" {
 				returnTypes = append(returnTypes, object.ARRAY)
+			} else if _type.(*ast.SymbolType).Name == "float" {
+				returnTypes = append(returnTypes, object.FLOAT)
 			}
 		}
 		function := &object.FunctionLiteral{

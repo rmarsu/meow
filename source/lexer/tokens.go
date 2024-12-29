@@ -52,7 +52,6 @@ const (
 	AND
 	IMPORT
 	CLASS
-	TYPEOF
 	CONST
 	LBRAK
 	RBRAK
@@ -81,7 +80,6 @@ var reserved_lookup map[string]TokenKind = map[string]TokenKind{
 	"or":       OR,
 	"and":      AND,
 	"import":   IMPORT,
-	"typeof":   TYPEOF,
 	"const":    CONST,
 	"class":    CLASS,
 	"static":   STATIC,
@@ -182,8 +180,6 @@ func TokenKindString(kind TokenKind) string {
 		return "AND"
 	case IMPORT:
 		return "IMPORT"
-	case TYPEOF:
-		return "TYPEOF"
 	case CONST:
 		return "CONST"
 	case LBRAK:

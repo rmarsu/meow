@@ -1,9 +1,23 @@
-var num1 = 14.2;
-var num2 = 14.4;
+var num1 = 15.2;
+var num2 = -15.2;
 
-if (num1 > num2) (
-    meow(num1);
-    meow(num2);
-) else (
-    meow("ajnfjewnfns");
+void sum(a float, b float) (float) (
+    return num1 + num2;
 );
+
+void min(a float, b float) (float) (
+    return num1 - num2;
+);
+
+void mul(a float, b float) (float) (
+    return num1 * num2;
+);
+
+void div(a float, b float) (float) (
+    return num1 / num2;
+);
+
+meow(sum(num1, num2));
+meow(min(num1, num2));
+meow(mul(num1, num2));
+meow(div(num1, num2));

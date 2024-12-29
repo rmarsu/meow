@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"meow/source/runner/object"
+	"os"
 )
 
 func nativeBoolToBooleanObject(value bool) *object.Boolean {
@@ -35,6 +36,8 @@ func isAllTruthy(obj []object.Object) bool {
 }
 
 func newError(format string, a ...interface{}) *object.Error {
+	fmt.Println(fmt.Sprintf(format, a...))
+	os.Exit(1)
 	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }
 
@@ -53,10 +56,14 @@ func checkForDefault(name string) bool {
 		return true
 	case "tail":
 		return true
+	case "string":
+		return true
+	case "typeof":
+		return true
 	}
 	return false
 }
 
 func isWhole(x float64) bool {
-	return math.Ceil(x) == x
+	return x == math.Floor(x) || x == math.Ceil(x)
 }

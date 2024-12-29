@@ -1,0 +1,35 @@
+class Person (
+     name string,
+     surname string,
+     age int,
+);
+
+class Dog (
+     klichka string,
+     age int,
+);
+
+var persona = ^^Person(
+     name = "John",
+     surname = "Doe",
+     age = 18,
+);
+
+var dog = ^^Dog(
+     klichka = "Bebe",
+     age = 2,
+);
+
+void ShowPerson(per Person) () (
+     meow(per.name);
+     meow(per.surname);
+     meow(per.age);     
+);
+
+void ShowDog(d Dog) () (
+     meow(d.klichka);
+     meow(d.age);
+);
+
+ShowPerson(persona);
+ShowDog(dog);

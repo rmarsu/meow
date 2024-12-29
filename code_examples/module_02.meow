@@ -1,7 +1,25 @@
-var something = "something";
+var i = 0;
+var word = "hello world";
+var a = ["letters"];
 
-const pi = 3.14;
+for (i < len(word)) (
+    if (word[i] == " ") (
+        meow("!! Пустой символ на " + string(i + 1));
 
-void findS(rad int) (int) (
-    return rad * rad * pi;
+    );
+    a = tail(a, word[i]);
+    i = i + 1;
 );
+
+void meowKawaii(arr array) (string) (
+    var res = "";
+    res = res + arr[0] + " ~"; 
+    j = 1;
+    for (j < len(arr)) (
+        res = res + arr[j] + "~";
+        j = j + 1;
+    );
+    return res;
+);
+
+meow("the result is " , meowKawaii(a));
