@@ -155,6 +155,8 @@ func Evaluate(node ast.Expression, env *object.Environment) object.Object {
 				if class.Name != params[i].Type.(*ast.SymbolType).Name {
 					return newError("Неверный объект %s для параметра %s", class.Name, params[i].Type.(*ast.SymbolType).Name)
 				}
+			} else if !checkTypes(arg, params[i].Type.(*ast.SymbolType).Name) {
+				return newError("Неверный аргумент %s для параметра %s.", arg.Inspect(), params[i].Type.(*ast.SymbolType).Name)
 			}
 		}
 		return applyFunction(functionObject, args)
@@ -206,6 +208,7 @@ func evaluateMemberInstance(instance string, member ast.Expression, env *object.
 				return newError("Функция %s не найдена в классе %s", memberName, class.Name)
 			}
 			params := EvaluateExpressions(member.(*ast.FunctionInstance).Parameters, env)
+			params = append([]object.Object{instanceVal}, params...)
 			actualClass, _ := env.Get(class.Name)
 			env.Set(class.Name, instanceVal)
 			result := applyFunction(function, params)
@@ -295,6 +298,13 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 		return newError("Не является функцией")
 	}
 	extendedEnv := extendFunctionEnv(function, args)
+	if function.IsMethod {
+		classInstance, ok := args[0].(*object.Class)
+		if !ok {
+			return newError("Метод должен быть вызван с объектом")
+		}
+		extendedEnv.Set("this", classInstance)
+	}
 	executed := Execute(function.Body, extendedEnv)
 	if IsError(executed) {
 		return executed
@@ -304,8 +314,15 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 
 func extendFunctionEnv(fn *object.FunctionLiteral, args []object.Object) *object.Environment {
 	env := object.NewEnclosedEnvironment(fn.Env)
+	startIndex := 0
+	if fn.IsMethod {
+		startIndex = 1
+	}
 	for index, param := range fn.Parameters {
-		env.Set(param.Names[0], args[index])
+		if index+startIndex >= len(args) {
+			break
+		}
+		env.Set(param.Names[0], args[startIndex+index])
 	}
 	return env
 }
@@ -578,7 +595,7 @@ func ExecuteClassDec(node ast.ClassDecStatement, env *object.Environment) object
 		variables[index] = tmp
 	}
 	for index, fn := range node.Functions {
-		tmp := EvaluateFunctionField(fn, env, index)
+		tmp := EvaluateFunctionField(className, fn, env, index)
 		functions[index] = tmp
 
 	}
@@ -611,17 +628,17 @@ func EvaluateClassField(variable ast.ClassFieldStatement, env *object.Environmen
 	return newError("Неизвестный тип поля: %s", variable.Type.(*ast.SymbolType).Name)
 }
 
-func EvaluateFunctionField(fn ast.ClassFunctionStatement, env *object.Environment, index string) object.Object {
-	var params []ast.VariableDecStatement
-	for _, param := range fn.Parameters {
-		tmp := ast.VariableDecStatement{
-			Names:         []string{index},
-			AssignedValue: nil,
-			Type:          param,
-			IsConstant:    false,
-		}
-		params = append(params, tmp)
-	}
+func EvaluateFunctionField(className string, fn ast.ClassFunctionStatement, env *object.Environment, index string) *object.FunctionLiteral {
+	// var params []ast.VariableDecStatement
+	// for _, param := range fn.Parameters {
+	// 	tmp := ast.VariableDecStatement{
+	// 		Names:         []string{index},
+	// 		AssignedValue: nil,
+	// 		Type:          param,
+	// 		IsConstant:    false,
+	// 	}
+	// 	params = append(params, tmp)
+	// }
 	var returnTypes []object.ObjectType
 	for _, _type := range fn.ReturnTypes {
 		switch _type.(type) {
@@ -640,14 +657,17 @@ func EvaluateFunctionField(fn ast.ClassFunctionStatement, env *object.Environmen
 	}
 	function, ok := env.Get(index)
 	if !ok {
-		return newError("Не найдено определение функции: %s", index)
+		newError("Не найдено определение функции: %s", index)
 	}
 	body := function.(*object.FunctionLiteral).Body
+	env.Delete(index)
 	return &object.FunctionLiteral{
 		Env:        env,
-		Parameters: params,
+		Parameters: function.(*object.FunctionLiteral).Parameters,
 		Body:       body,
 		ReturnType: returnTypes,
+		IsMethod:   true,
+		ClassName:  className,
 	}
 }
 

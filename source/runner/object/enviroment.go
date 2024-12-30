@@ -27,6 +27,14 @@ func (e *Environment) Get(name string) (Object, bool) {
 	return obj, ok
 }
 
+func (e *Environment) Delete(name string) Object {
+	obj, ok := e.store[name]
+	if ok {
+		delete(e.store, name)
+	}
+	return obj
+}
+
 func (e *Environment) Set(name string, value Object) Object {
 	e.store[name] = value
 	return value
@@ -34,11 +42,11 @@ func (e *Environment) Set(name string, value Object) Object {
 
 func NewEnclosedEnvironment(outer *Environment) *Environment {
 	env := NewEnvironment()
-	env.store = outer.store
+	env.outer = outer
 	return env
 }
 
-func (e *Environment) Errors() []Error {
-    return e.errors
-}
 
+func (e *Environment) Errors() []Error {
+	return e.errors
+}

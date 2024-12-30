@@ -11,12 +11,12 @@ for (i < len(word)) (
     i = i + 1;
 );
 
-void meowKawaii(arr array) (string) (
+void meowKawaii(ar array) (string) (
     var res = "";
-    res = res + arr[0] + " ~"; 
+    res = res + ar[0] + " ~"; 
     j = 1;
-    for (j < len(arr)) (
-        res = res + arr[j] + "~";
+    for (j < len(ar)) (
+        res = res + ar[j] + "~";
         j = j + 1;
     );
     return res;

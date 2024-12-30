@@ -1,12 +1,12 @@
+void ShowPerson(name string) () (
+     this.name = name;    
+);
+
 class Person (
      name string,
      surname string,
      age int,
-);
-
-class Dog (
-     klichka string,
-     age float,
+     ShowPerson(string) (),
 );
 
 var persona = ^^Person(
@@ -15,24 +15,19 @@ var persona = ^^Person(
      age = 18,
 );
 
-var dog = ^^Dog(
-     klichka = "Bebe",
-     age = 2.2,
+var persona2 = ^^Person(
+     name = "Jane",
+     surname = "Doe",
+     age = 15,
 );
+meow(persona.name);
+meow(persona2.name);
 
-void ShowPerson(per Person) () (
-     meow(per.name);
-     meow(per.surname);
-     meow(per.age);     
-);
+persona.ShowPerson("Jane");
+persona2.ShowPerson("John");
 
-void ChangeDogName(d Dog, name string) () (
-     d.klichka = name;
-);
-
-meow(dog.klichka);
-ChangeDogName(dog, "боблин");
-meow(dog.klichka);
+meow(persona.name);
+meow(persona2.name);
 
 
 ## няшный комментарий

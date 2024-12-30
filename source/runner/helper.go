@@ -64,6 +64,18 @@ func checkForDefault(name string) bool {
 	return false
 }
 
+var typesInStrings = map[string]object.ObjectType{
+	"int":    object.INTEGER,
+	"float":  object.FLOAT,
+	"string": object.STRING,
+	"bool":   object.BOOLEAN,
+	"array":  object.ARRAY,
+}
+
+func checkTypes(obj object.Object, _type string) bool {
+	return obj.Type() == typesInStrings[_type]
+}
+
 func isWhole(x float64) bool {
 	return x == math.Floor(x) || x == math.Ceil(x)
 }

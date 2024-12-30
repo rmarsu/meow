@@ -122,7 +122,9 @@ type FunctionLiteral struct {
 	Parameters []ast.VariableDecStatement
 	ReturnType []ObjectType
 	Body       *ast.BlockStatement
-}
+	IsMethod   bool
+	ClassName  string
+ }
 
 func (fl *FunctionLiteral) Type() ObjectType {
 	return FUNCTION
