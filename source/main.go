@@ -53,3 +53,19 @@ func DebugTree(filepath string) {
 	}
 	litter.Dump(ast)
 }
+
+func DebugTokens(filepath string) {
+	file, err := os.Open(filepath)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	input, err := io.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+	tokens := lexer.Tokenize(string(input))
+	for _, token := range tokens {
+		fmt.Println(lexer.TokenKindString(lexer.GetTokenKind(token)), token.Value)
+	}
+}

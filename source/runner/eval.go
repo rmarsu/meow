@@ -340,7 +340,7 @@ func unwrapReturn(obj object.Object, _types []object.ObjectType) object.Object {
 				return newError("Невозможно привести возвращаемое значение к %s", _types[i])
 			}
 		}
-		return returnValue
+		return returnValue.Values[0]
 	}
 	return newError("Функция ничего не возвращает")
 }
